@@ -78,45 +78,91 @@
 
       if (scenario === "link_budget") {
         form.innerHTML += `
-          <label>Transmit Power (dBm):</label>
-          <input type="number" name="txPower" required>
-          <label>Tx Antenna Gain (dBi):</label>
+          <label>Transmitter Antenna Gain (G_tx, dBi):</label>
           <input type="number" name="txGain" required>
-          <label>Rx Antenna Gain (dBi):</label>
+          <label>Receiver Antenna Gain (G_rx, dBi):</label>
           <input type="number" name="rxGain" required>
-          <label>Path Loss (dB):</label>
-          <input type="number" name="pathLoss" required>
+          <label>Frequency (f, MHz):</label>
+          <input type="number" name="frequency" required>
+          <label>Distance between Transmitter and Receiver (d, km):</label>
+          <input type="number" name="distance" required>
+          <label>Path Loss Model:</label>
+          <select name="pathLossModel" required>
+            <option value="free_space">Free Space Path Loss</option>
+          </select>
+          <label>System Losses (L, dB):</label>
+          <input type="number" name="systemLoss" required>
+          <label>Receiver Sensitivity (dBm):</label>
+          <input type="number" name="rxSensitivity" required>
         `;
       } else if (scenario === "ofdm") {
         form.innerHTML += `
-          <label>Subcarriers:</label>
-          <input type="number" name="subcarriers" required>
-          <label>Bits per Symbol:</label>
-          <input type="number" name="bitsPerSymbol" required>
-          <label>Symbol Rate (symbols/sec):</label>
-          <input type="number" name="symbolRate" required>
+          <label>Carrier Frequency (KHz):</label>
+          <input type="number" name="carrierFreq" required>
+          <label>Bandwidth (KHz):</label>
+          <input type="number" name="bandwidth" required>
+          <label>Subcarrier Spacing (KHz):</label>
+          <input type="number" name="subcarrierSpacing" required>
+          <label>Number of Resource Elements (RE):</label>
+          <input type="number" name="numRE" required>
+          <label>Modulation Scheme (e.g., QPSK, 16QAM):</label>
+          <input type="text" name="modulation" required>
+          <label>Code Rate (0-1):</label>
+          <input type="number" name="codeRate" min="0" max="1" step="0.01" required>
+          <label>Number of OFDM Symbols per Resource Block:</label>
+          <input type="number" name="numSymbols" required>
+          <label>Cyclic Prefix Length (μs):</label>
+          <input type="number" name="cyclicPrefix" required>
+          <label>Number of Resource Blocks (RB):</label>
+          <input type="number" name="numRB" required>
+          <label>Parallel Resource Blocks:</label>
+          <input type="number" name="parallelRB" required>
+          <label>Transmission Power (dBm):</label>
+          <input type="number" name="txPower" required>
         `;
       } else if (scenario === "wireless_comm") {
         form.innerHTML += `
-          <label>Sampling Rate (Hz):</label>
-          <input type="number" name="samplingRate" required>
+          <label>Bandwidth from Source (kHz):</label>
+          <input type="number" name="bandwidth" step="0.01" required>
+          <label>Sampling Rate (Hz): <span style="font-size:smaller;">(Default: Nyquist rate = 2 × Bandwidth)</span></label>
+          <input type="number" name="samplingRate" placeholder="Leave blank for Nyquist rate">
           <label>Quantization Bits:</label>
           <input type="number" name="quantBits" required>
-          <label>Source Encoding Rate (kbps):</label>
-          <input type="number" name="sourceRate" required>
-          <label>Channel Coding Overhead (%):</label>
-          <input type="number" name="channelOverhead" required>
+          <label>Source Encoder Rate (0-1):</label>
+          <input type="number" name="sourceEncoderRate" min="0" max="1" step="0.01" required>
+          <label>Channel Encoder Rate (0-1):</label>
+          <input type="number" name="channelEncoderRate" min="0" max="1" step="0.01" required>
+          <label>Interleaver Rate:</label>
+          <input type="number" name="interleaverRate" step="0.01" required>
+          <label>Burst Length:</label>
+          <input type="number" name="burstLength" required>
         `;
       } else if (scenario === "cellular") {
         form.innerHTML += `
-          <label>Total Area (km²):</label>
-          <input type="number" name="area" required>
+          <label>Available Bandwidth (MHz):</label>
+          <input type="number" name="bandwidth" required>
+          <label>Carrier Frequency (MHz):</label>
+          <input type="number" name="carrierFreq" required>
           <label>Cell Radius (km):</label>
-          <input type="number" name="radius" required>
+          <input type="number" name="cellRadius" required>
+          <label>Number of Cells:</label>
+          <input type="number" name="numCells" required>
+          <label>Transmitter Power (P_tx, dBm):</label>
+          <input type="number" name="txPower" required>
+          <label>Antenna Gain (G_tx, dBi):</label>
+          <input type="number" name="txGain" required>
           <label>Frequency Reuse Factor:</label>
-          <input type="number" name="reuse" required>
-          <label>Users per Cell:</label>
-          <input type="number" name="users" required>
+          <input type="number" name="reuseFactor" required>
+          <label>User Density (users/km²):</label>
+          <input type="number" name="userDensity" required>
+          <label>Data Rate per User (kbps):</label>
+          <input type="number" name="userDataRate" required>
+          <label>SNR/SINR (dB):</label>
+          <input type="number" name="snr" required>
+          <label>C/I (Carrier-to-Interference Ratio, dB):</label>
+          <input type="number" name="ci" required>
+          <label>Traffic Demand per Cell (Erlangs):</label>
+          <input type="number" name="trafficDemand" required>
         `;
       }
 
@@ -134,34 +180,58 @@
       let prompt = "";
 
       if (scenario === "link_budget") {
-        prompt = `Calculate the received power using link budget:
-    Transmit power = ${data.txPower} dBm
-    Transmitter gain = ${data.txGain} dBi
-    Receiver gain = ${data.rxGain} dBi
-    Path loss = ${data.pathLoss} dB.
-    Return the answer as Markdown with LaTeX math for all equations.`;
+        prompt = `# Link Budget Calculation\n\n` +
+          `- **Transmitter Antenna Gain (G_tx):** ${data.txGain} dBi\n` +
+          `- **Receiver Antenna Gain (G_rx):** ${data.rxGain} dBi\n` +
+          `- **Frequency (f):** ${data.frequency} MHz\n` +
+          `- **Distance (d):** ${data.distance} km\n` +
+          `- **Path Loss Model:** ${data.pathLossModel === 'free_space' ? 'Free Space Path Loss' : data.pathLossModel}\n` +
+          `- **System Losses (L):** ${data.systemLoss} dB\n` +
+          `- **Receiver Sensitivity:** ${data.rxSensitivity} dBm\n\n` +
+          `Link Budget Calculation: Compute the transmitted power and received signal strength in a flat environment based on transmitter and receiver specifications. Show all steps and explanations in markdown. Do not use <br> or HTML tags, only markdown.`;
       } else if (scenario === "ofdm") {
-        prompt = `Calculate the total data rate and spectral efficiency for an OFDM system with:
-    Subcarriers = ${data.subcarriers}
-    Bits per symbol = ${data.bitsPerSymbol}
-    Symbol rate = ${data.symbolRate} symbols/sec.
-    Return the answer as Markdown with LaTeX math for all equations.`;
+        // Compose markdown prompt for OFDM scenario
+        prompt = `# OFDM System Calculation\n\n` +
+          `- **Carrier Frequency:** ${data.carrierFreq} KHz\n` +
+          `- **Bandwidth:** ${data.bandwidth} KHz\n` +
+          `- **Subcarrier Spacing:** ${data.subcarrierSpacing} KHz\n` +
+          `- **Number of Resource Elements (RE):** ${data.numRE}\n` +
+          `- **Modulation Scheme:** ${data.modulation}\n` +
+          `- **Code Rate:** ${data.codeRate}\n` +
+          `- **Number of OFDM Symbols per Resource Block:** ${data.numSymbols}\n` +
+          `- **Cyclic Prefix Length:** ${data.cyclicPrefix} μs\n` +
+          `- **Number of Resource Blocks (RB):** ${data.numRB}\n` +
+          `- **Parallel Resource Blocks:** ${data.parallelRB}\n` +
+          `- **Transmission Power:** ${data.txPower} dBm\n\n` +
+          `Calculate the data rates for resource elements, OFDM symbols, resource
+blocks, maximum transmission capacity using parallel resource blocks, and spectral
+efficiency, and explain each step in markdown format. Present the results in a clear, step-by-step manner with explanations for each calculation. Do not use <br> or HTML tags, only markdown.`;
       } else if (scenario === "wireless_comm") {
-        prompt = `For a wireless communication system:
-    Sampling rate = ${data.samplingRate} Hz
-    Quantization bits = ${data.quantBits}
-    Source encoding rate = ${data.sourceRate} kbps
-    Channel coding overhead = ${data.channelOverhead}%.
-    Calculate the rate at the output of each block: sampler, quantizer, source encoder, channel encoder.
-    Return the answer as Markdown with LaTeX math for all equations.`;
+        // Get values and set sampling rate if blank
+        let bandwidth = Number(data.bandwidth);
+        let samplingRate = data.samplingRate ? Number(data.samplingRate) : 2 * bandwidth * 1000;
+        let quantBits = Number(data.quantBits);
+        let sourceEncoderRate = Number(data.sourceEncoderRate);
+        let channelEncoderRate = Number(data.channelEncoderRate);
+        let interleaverRate = Number(data.interleaverRate);
+        let burstLength = Number(data.burstLength);
+        prompt = `For a wireless communication system:\n` +
+          `Bandwidth from source = ${bandwidth} kHz\n` +
+          `Sampling rate = ${samplingRate} Hz (default is Nyquist: 2 × Bandwidth)\n` +
+          `Quantization bits = ${quantBits}\n` +
+          `Source encoder rate = ${sourceEncoderRate}\n` +
+          `Channel encoder rate = ${channelEncoderRate}\n` +
+          `Interleaver rate = ${interleaverRate}\n` +
+          `Burst length = ${burstLength}.\n` +
+          `\nCalculate and show the rate at the output of each block (sampler, quantizer, source encoder, channel encoder, interleaver, burst formatter). For each block, show the result and a brief explanation of how it was calculated. Present the results in a clear, step-by-step format.`;
       } else if (scenario === "cellular") {
         prompt = `Design a cellular system with:
-    Total area = ${data.area} km²
-    Cell radius = ${data.radius} km
-    Frequency reuse factor = ${data.reuse}
-    Users per cell = ${data.users}.
-    Estimate total number of cells, coverage, and system capacity.
-    Return the answer as Markdown with LaTeX math for all equations.`;
+Total area = ${data.area} km²
+Cell radius = ${data.radius} km
+Frequency reuse factor = ${data.reuse}
+Users per cell = ${data.users}.
+Estimate total number of cells, coverage, and system capacity.
+Do not show the final answer directly. Instead, provide only the discussion and explanation of how the results are obtained,as one paragraph,as normal text `;
       }
 
       // Send POST request to FastAPI backend (main.py)
