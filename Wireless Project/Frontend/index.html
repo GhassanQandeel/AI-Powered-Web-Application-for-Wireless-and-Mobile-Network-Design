@@ -46,6 +46,9 @@
       margin-top: 20px;
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
 
@@ -131,25 +134,47 @@
       let prompt = "";
 
       if (scenario === "link_budget") {
-        prompt = `Calculate the received power using link budget:\nTransmit power = ${data.txPower} dBm\nTransmitter gain = ${data.txGain} dBi\nReceiver gain = ${data.rxGain} dBi\nPath loss = ${data.pathLoss} dB.`;
+        prompt = `Calculate the received power using link budget:
+    Transmit power = ${data.txPower} dBm
+    Transmitter gain = ${data.txGain} dBi
+    Receiver gain = ${data.rxGain} dBi
+    Path loss = ${data.pathLoss} dB.
+    Return the answer as Markdown with LaTeX math for all equations.`;
       } else if (scenario === "ofdm") {
-        prompt = `Calculate the total data rate and spectral efficiency for an OFDM system with:\nSubcarriers = ${data.subcarriers}\nBits per symbol = ${data.bitsPerSymbol}\nSymbol rate = ${data.symbolRate} symbols/sec.`;
+        prompt = `Calculate the total data rate and spectral efficiency for an OFDM system with:
+    Subcarriers = ${data.subcarriers}
+    Bits per symbol = ${data.bitsPerSymbol}
+    Symbol rate = ${data.symbolRate} symbols/sec.
+    Return the answer as Markdown with LaTeX math for all equations.`;
       } else if (scenario === "wireless_comm") {
-        prompt = `For a wireless communication system:\nSampling rate = ${data.samplingRate} Hz\nQuantization bits = ${data.quantBits}\nSource encoding rate = ${data.sourceRate} kbps\nChannel coding overhead = ${data.channelOverhead}%.\nCalculate the rate at the output of each block: sampler, quantizer, source encoder, channel encoder.`;
+        prompt = `For a wireless communication system:
+    Sampling rate = ${data.samplingRate} Hz
+    Quantization bits = ${data.quantBits}
+    Source encoding rate = ${data.sourceRate} kbps
+    Channel coding overhead = ${data.channelOverhead}%.
+    Calculate the rate at the output of each block: sampler, quantizer, source encoder, channel encoder.
+    Return the answer as Markdown with LaTeX math for all equations.`;
       } else if (scenario === "cellular") {
-        prompt = `Design a cellular system with:\nTotal area = ${data.area} km²\nCell radius = ${data.radius} km\nFrequency reuse factor = ${data.reuse}\nUsers per cell = ${data.users}.\nEstimate total number of cells, coverage, and system capacity.`;
+        prompt = `Design a cellular system with:
+    Total area = ${data.area} km²
+    Cell radius = ${data.radius} km
+    Frequency reuse factor = ${data.reuse}
+    Users per cell = ${data.users}.
+    Estimate total number of cells, coverage, and system capacity.
+    Return the answer as Markdown with LaTeX math for all equations.`;
       }
 
-      // Send GET request to Gemini-powered backend
-      const response = await fetch(`http://localhost:8000/ai?prompt=${encodeURIComponent(prompt)}`);
+      // Send POST request to FastAPI backend (main.py)
+      const response = await fetch("/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      });
       const result = await response.json();
-      console.log("Raw response:", result);
       const output = document.getElementById("outputArea");
       output.style.display = "block";
-      output.innerHTML = `
-        <h3>AI Result:</h3>
-        <p>${result.response}</p>
-      `;
+      output.innerHTML = marked.parse(result.response || "No response from AI.");
+      MathJax.typesetPromise([output]);
     }
   </script>
 
