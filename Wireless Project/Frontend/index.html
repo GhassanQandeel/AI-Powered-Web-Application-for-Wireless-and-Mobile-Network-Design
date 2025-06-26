@@ -4,13 +4,34 @@
   <meta charset="UTF-8">
   <title>Wireless & Mobile Network Design Tool</title>
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      margin: 40px;
-      background-color: #f4f8fb;
-    }
+     body {
+            margin: 0;
+            font-family:'Courier New', Courier, monospace ;
+            font-weight: 800;
+            background: linear-gradient(-45deg, #fbfbfb, #1e4599, #1e4599, #6fd3db);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            text-align: left;
+        }
+
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
     h1, h2 {
       text-align: center;
+      color: #fff;
+      margin-top: 20px;
+      font-family:'Courier New', Courier, monospace ;
     }
     .container {
       max-width: 700px;
@@ -30,6 +51,8 @@
       margin-bottom: 15px;
       border-radius: 5px;
       border: 1px solid #ccc;
+      font-family:'Courier New', Courier, monospace ;
+      font-weight: 700;
     }
     button {
       background-color: #007bff;
@@ -57,7 +80,7 @@
 
     <label for="scenario">Select Scenario:</label>
     <select id="scenario" onchange="loadFormFields()">
-      <option value="">-- Choose a scenario --</option>
+      <option value="">Choose a scenario</option>
       <option value="wireless_comm">Wireless Communication System</option>
       <option value="ofdm">OFDM System</option>
       <option value="link_budget">Link Budget Calculation</option>
