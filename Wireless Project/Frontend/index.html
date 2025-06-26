@@ -78,48 +78,59 @@
 
       if (scenario === "link_budget") {
         form.innerHTML += `
-          <label>Transmitter Antenna Gain (G_tx, dBi):</label>
-          <input type="number" name="txGain" required>
-          <label>Receiver Antenna Gain (G_rx, dBi):</label>
-          <input type="number" name="rxGain" required>
-          <label>Frequency (f, MHz):</label>
-          <input type="number" name="frequency" required>
-          <label>Distance between Transmitter and Receiver (d, km):</label>
-          <input type="number" name="distance" required>
-          <label>Path Loss Model:</label>
-          <select name="pathLossModel" required>
-            <option value="free_space">Free Space Path Loss</option>
-          </select>
-          <label>System Losses (L, dB):</label>
-          <input type="number" name="systemLoss" required>
-          <label>Receiver Sensitivity (dBm):</label>
-          <input type="number" name="rxSensitivity" required>
+          <label>Link Margin (dB):</label>
+    <input type="number" name="link_margin_db" required step="0.1" min="0">
+
+    <label>Temperature (K):</label>
+    <input type="number" name="temperature_k" required min="0" step="1" value="290">
+
+    <label>Receiver Noise Figure (dB):</label>
+    <input type="number" name="noise_figure_db" required min="0" step="0.1">
+
+    <label>Bitrate (bps):</label>
+    <input type="number" name="bitrate" required min="1" step="1" value="1000000">
+
+    <label>Required Eb/N0 (dB):</label>
+    <input type="number" name="eb_n0_db" required step="0.1" min="0" max="100">
+
+    <label>Distance between Transmitter and Receiver (km):</label>
+    <input type="number" name="distance" required min="0.001" step="0.001" max="10000">
+
+    <label>Frequency (MHz):</label>
+    <input type="number" name="frequency" required min="1" step="0.01" max="100000">
+
+    <label>Transmitter Antenna Gain (G_tx, dBi):</label>
+    <input type="number" name="tx_gain" required step="0.01" min="-100" max="100">
+
+    <label>Receiver Antenna Gain (G_rx, dBi):</label>
+    <input type="number" name="rx_gain" required step="0.01" min="-100" max="100">
+
+    <label>Total System Losses (dB):</label>
+    <input type="number" name="system_loss_db" required min="0" step="0.01" max="100">
         `;
       } else if (scenario === "ofdm") {
         form.innerHTML += `
-          <label>Carrier Frequency (KHz):</label>
-          <input type="number" name="carrierFreq" required>
+
           <label>Bandwidth (KHz):</label>
-          <input type="number" name="bandwidth" required>
+          <input type="number" name="bandwidth" required min="1">
+
           <label>Subcarrier Spacing (KHz):</label>
-          <input type="number" name="subcarrierSpacing" required>
-          <label>Number of Resource Elements (RE):</label>
-          <input type="number" name="numRE" required>
+          <input type="number" name="subcarrierSpacing" required min="1">
+
           <label>Modulation Scheme (e.g., QPSK, 16QAM):</label>
-          <input type="text" name="modulation" required>
-          <label>Code Rate (0-1):</label>
-          <input type="number" name="codeRate" min="0" max="1" step="0.01" required>
+          <input type="text" name="modulation" required pattern="^[A-Za-z0-9]+$" title="Alphanumeric only">
+
           <label>Number of OFDM Symbols per Resource Block:</label>
-          <input type="number" name="numSymbols" required>
-          <label>Cyclic Prefix Length (μs):</label>
-          <input type="number" name="cyclicPrefix" required>
-          <label>Number of Resource Blocks (RB):</label>
-          <input type="number" name="numRB" required>
+          <input type="number" name="numSymbols" required min="1">
+
+          <label>Duration of each resource Block (ms):</label>
+          <input type="number" name="duration_of_RB" required min="0.01" step="0.01">
+
           <label>Parallel Resource Blocks:</label>
-          <input type="number" name="parallelRB" required>
-          <label>Transmission Power (dBm):</label>
-          <input type="number" name="txPower" required>
+          <input type="number" name="parallelRB" required min="1">
+
         `;
+        
       } 
       else if (scenario === "wireless_comm") {
         form.innerHTML += `
@@ -147,29 +158,40 @@
       } else if (scenario === "cellular") {
         form.innerHTML += `
           <label>Available Bandwidth (MHz):</label>
-          <input type="number" name="bandwidth" required>
+          <input type="number" name="bandwidth" required min="0.01" step="0.01">
+
           <label>Carrier Frequency (MHz):</label>
-          <input type="number" name="carrierFreq" required>
+          <input type="number" name="carrierFreq" required min="1" step="0.01">
+
           <label>Cell Radius (km):</label>
-          <input type="number" name="cellRadius" required>
+          <input type="number" name="cellRadius" required min="0.01" step="0.01">
+
           <label>Number of Cells:</label>
-          <input type="number" name="numCells" required>
+          <input type="number" name="numCells" required min="1" step="1">
+
           <label>Transmitter Power (P_tx, dBm):</label>
-          <input type="number" name="txPower" required>
+          <input type="number" name="txPower" required step="0.01">
+
           <label>Antenna Gain (G_tx, dBi):</label>
-          <input type="number" name="txGain" required>
+          <input type="number" name="txGain" required step="0.01">
+
           <label>Frequency Reuse Factor:</label>
-          <input type="number" name="reuseFactor" required>
+          <input type="number" name="reuseFactor" required min="1" step="1">
+
           <label>User Density (users/km²):</label>
-          <input type="number" name="userDensity" required>
+          <input type="number" name="userDensity" required min="0" step="1">
+
           <label>Data Rate per User (kbps):</label>
-          <input type="number" name="userDataRate" required>
+          <input type="number" name="userDataRate" required min="1" step="1">
+
           <label>SNR/SINR (dB):</label>
-          <input type="number" name="snr" required>
+          <input type="number" name="snr" required step="0.01">
+
           <label>C/I (Carrier-to-Interference Ratio, dB):</label>
-          <input type="number" name="ci" required>
+          <input type="number" name="ci" required step="0.01">
+
           <label>Traffic Demand per Cell (Erlangs):</label>
-          <input type="number" name="trafficDemand" required>
+          <input type="number" name="trafficDemand" required min="0" step="0.01">
         `;
       }
 
