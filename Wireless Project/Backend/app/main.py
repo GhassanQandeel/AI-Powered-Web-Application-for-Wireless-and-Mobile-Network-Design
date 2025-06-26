@@ -33,15 +33,3 @@ def read_root():
     frontend_path = os.path.join(BASE_DIR, "..", "Frontend", "index.html")
     return FileResponse(os.path.abspath(frontend_path), media_type="text/html")
 
-class PromptRequest(BaseModel):
-    prompt: str
-
-@app.post("/ai")
-async def ai_endpoint(request: PromptRequest):
-    try:
-        genai.configure(api_key=GEMINI_API_KEY)
-        model = genai.GenerativeModel("gemini-2.5-flash")
-        response = model.generate_content(request.prompt)
-        return JSONResponse(content={"response": response.text})
-    except Exception as e:
-        return JSONResponse(content={"response": f"Error: {str(e)}"}, status_code=500)

@@ -176,74 +176,25 @@
       const formData = new FormData(form);
       const data = Object.fromEntries(formData.entries());
 
-      // Create natural language prompt for Gemini API
-      let prompt = "";
-
-      if (scenario === "link_budget") {
-        prompt = `# Link Budget Calculation\n\n` +
-          `- **Transmitter Antenna Gain (G_tx):** ${data.txGain} dBi\n` +
-          `- **Receiver Antenna Gain (G_rx):** ${data.rxGain} dBi\n` +
-          `- **Frequency (f):** ${data.frequency} MHz\n` +
-          `- **Distance (d):** ${data.distance} km\n` +
-          `- **Path Loss Model:** ${data.pathLossModel === 'free_space' ? 'Free Space Path Loss' : data.pathLossModel}\n` +
-          `- **System Losses (L):** ${data.systemLoss} dB\n` +
-          `- **Receiver Sensitivity:** ${data.rxSensitivity} dBm\n\n` +
-          `Link Budget Calculation: Compute the transmitted power and received signal strength in a flat environment based on transmitter and receiver specifications. Show all steps and explanations in markdown. Do not use <br> or HTML tags, only markdown.`;
-      } else if (scenario === "ofdm") {
-        // Compose markdown prompt for OFDM scenario
-        prompt = `# OFDM System Calculation\n\n` +
-          `- **Carrier Frequency:** ${data.carrierFreq} KHz\n` +
-          `- **Bandwidth:** ${data.bandwidth} KHz\n` +
-          `- **Subcarrier Spacing:** ${data.subcarrierSpacing} KHz\n` +
-          `- **Number of Resource Elements (RE):** ${data.numRE}\n` +
-          `- **Modulation Scheme:** ${data.modulation}\n` +
-          `- **Code Rate:** ${data.codeRate}\n` +
-          `- **Number of OFDM Symbols per Resource Block:** ${data.numSymbols}\n` +
-          `- **Cyclic Prefix Length:** ${data.cyclicPrefix} μs\n` +
-          `- **Number of Resource Blocks (RB):** ${data.numRB}\n` +
-          `- **Parallel Resource Blocks:** ${data.parallelRB}\n` +
-          `- **Transmission Power:** ${data.txPower} dBm\n\n` +
-          `Calculate the data rates for resource elements, OFDM symbols, resource
-blocks, maximum transmission capacity using parallel resource blocks, and spectral
-efficiency, and explain each step in markdown format. Present the results in a clear, step-by-step manner with explanations for each calculation. Do not use <br> or HTML tags, only markdown.`;
-      } else if (scenario === "wireless_comm") {
-        // Get values and set sampling rate if blank
-        let bandwidth = Number(data.bandwidth);
-        let samplingRate = data.samplingRate ? Number(data.samplingRate) : 2 * bandwidth * 1000;
-        let quantBits = Number(data.quantBits);
-        let sourceEncoderRate = Number(data.sourceEncoderRate);
-        let channelEncoderRate = Number(data.channelEncoderRate);
-        let interleaverRate = Number(data.interleaverRate);
-        let burstLength = Number(data.burstLength);
-        prompt = `For a wireless communication system:\n` +
-          `Bandwidth from source = ${bandwidth} kHz\n` +
-          `Sampling rate = ${samplingRate} Hz (default is Nyquist: 2 × Bandwidth)\n` +
-          `Quantization bits = ${quantBits}\n` +
-          `Source encoder rate = ${sourceEncoderRate}\n` +
-          `Channel encoder rate = ${channelEncoderRate}\n` +
-          `Interleaver rate = ${interleaverRate}\n` +
-          `Burst length = ${burstLength}.\n` +
-          `\nCalculate and show the rate at the output of each block (sampler, quantizer, source encoder, channel encoder, interleaver, burst formatter). For each block, show the result and a brief explanation of how it was calculated. Present the results in a clear, step-by-step format.`;
-      } else if (scenario === "cellular") {
-        prompt = `Design a cellular system with:
-Total area = ${data.area} km²
-Cell radius = ${data.radius} km
-Frequency reuse factor = ${data.reuse}
-Users per cell = ${data.users}.
-Estimate total number of cells, coverage, and system capacity.
-Do not show the final answer directly. Instead, provide only the discussion and explanation of how the results are obtained,as one paragraph,as normal text `;
-      }
-
-      // Send POST request to FastAPI backend (main.py)
-      const response = await fetch("/ai", {
+      // Send structured data to backend for calculation
+      const response = await fetch("/api/v1/calculate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ scenario, data }),
       });
       const result = await response.json();
+
+      // Show calculated results
       const output = document.getElementById("outputArea");
       output.style.display = "block";
-      output.innerHTML = marked.parse(result.response || "No response from AI.");
+      let html = "<h3>Calculated Results</h3>";
+      if (result.calculation) {
+        html += `<pre>${JSON.stringify(result.calculation, null, 2)}</pre>`;
+      }
+      if (result.gemini) {
+        html += "<h3>Gemini Discussion</h3>" + marked.parse(result.gemini);
+      }
+      output.innerHTML = html;
       MathJax.typesetPromise([output]);
     }
   </script>
