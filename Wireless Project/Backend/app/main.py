@@ -17,7 +17,7 @@ load_dotenv(dotenv_path=env_path)
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 app = FastAPI()
-app.mount("/", StaticFiles(directory="../frontend", html=True), name="static")
+#app.mount("/", StaticFiles(directory="../frontend", html=True), name="static")
 # Allow CORS for local frontend development
 app.add_middleware(
     CORSMiddleware,
@@ -31,6 +31,6 @@ app.include_router(api_router, prefix="/api/v1")
 app.include_router(api_router, prefix="")   
 @app.get("/")
 def read_root():
-    frontend_path = os.path.join(BASE_DIR, "..", "Frontend", "welcome.html")
+    frontend_path = os.path.join(BASE_DIR, "..", "Frontend", "index.html")
     return FileResponse(os.path.abspath(frontend_path), media_type="text/html")
 
