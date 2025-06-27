@@ -2,174 +2,157 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Welcome - Wireless Network Tool</title>
-    <style>
-        body {
-            margin: 0;
-            font-family:'Courier New', Courier, monospace ;
-            font-weight: 800;
-            background: linear-gradient(-45deg, #fbfbfb, #1e4599, #1e4599, #6fd3db);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            color: white;
-            text-align: center;
-        }
+  <meta charset="UTF-8" />
+  <title>Welcome - Wireless Network Tool</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Courier New', Courier, monospace;
+      font-weight: 800;
+      background: linear-gradient(-45deg, #fbfbfb, #1e4599, #1e4599, #6fd3db);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      color: white;
+      text-align: center;
+    }
 
-        @keyframes gradientBG {
-            0% {
-                background-position: 0% 50%;
-            }
+    @keyframes gradientBG {
+      0% {
+        background-position: 0% 50%;
+      }
 
-            50% {
-                background-position: 100% 50%;
-            }
+      50% {
+        background-position: 100% 50%;
+      }
 
-            100% {
-                background-position: 0% 50%;
-            }
-        }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
 
+    h1 {
+      margin-bottom: 80px;
+      font-size: 36px;
+    }
 
-        h1 {
-            margin-bottom: 80px;
-            color: #ffffff;
-            font-size: 36px;
-            font-family:'Courier New', Courier, monospace ;
-            font-weight: 800;
-        }
+    .team {
+      display: flex;
+      gap: 40px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
 
-        .team {
-            display: flex;
-            gap: 40px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
+    .member {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-        .member {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+    .member img {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 50%;
+      box-shadow: 10px 10px 10px rgba(255, 255, 255, 0.2);
+      margin-bottom: 10px;
+      border: 1px solid #fff;
+    }
 
-        .member img {
-            width: 150px;
-            height: 150px;
-            object-fit: cover;
-            border-radius: 50%;
-            box-shadow: 10px 10px 10px rgba(255, 255, 255, 0.2);
-            margin-bottom: 10px;
-            border: 1px solid #fff;
-        }
+    .member p {
+      margin: 0;
+      font-weight: bold;
+      color: #fff;
+      font-size: 18px;
+    }
 
-        .member p {
-            margin: 0;
-            font-weight: bold;
-            color: #fff;
-            font-size: 18px;
-        }
+    .super-button {
+      margin-top: 40px;
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 14px 28px;
+      background: linear-gradient(145deg, #4b4d67, #5d5c7b);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 100px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.4s ease-in-out;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+      backdrop-filter: blur(8px);
+      z-index: 1;
+      overflow: hidden;
+      isolation: isolate; /* Prevent ::before from overlapping */
+    }
 
+    .super-button::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, #0063c0, #4000ff, #00ffff);
+      z-index: -2;
+      border-radius: inherit;
+    }
 
-        .super-button {
-            margin-top: 40px;
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            padding: 14px 28px;
-            background: linear-gradient(145deg, #4b4d67, #5d5c7b);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 100px;
-            color: #fff;
-            font-family:'Courier New', Courier, monospace ;
-            font-size: 16px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            cursor: pointer;
-            overflow: hidden;
-            transition: all 0.4s ease-in-out;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
-            backdrop-filter: blur(8px);
-            z-index: 1;
-        }
+    .super-button::after {
+      content: "";
+      position: absolute;
+      inset: 2px;
+      background: #0a0a0a;
+      border-radius: inherit;
+      z-index: -1;
+    }
 
-        .super-button::before {
-            content: "";
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: conic-gradient(from 0deg, #0063c0, #4000ff, #00ffff);
-            animation: rotate 4s linear infinite;
-            z-index: -2;
-        }
+    .super-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 40px rgba(0, 255, 255, 0.2);
+    }
 
-        .super-button::after {
-            content: "";
-            position: absolute;
-            inset: 2px;
-            background: #0a0a0a;
-            border-radius: inherit;
-            z-index: -1;
-        }
+    .super-button:hover .arrow {
+      transform: translateX(6px);
+    }
 
-        .super-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 40px rgba(0, 255, 255, 0.2);
-        }
-
-        .super-button:hover .arrow {
-            transform: translateX(6px);
-        }
-
-        .arrow {
-            width: 22px;
-            height: 22px;
-            transition: transform 0.3s ease-in-out;
-            color: #00ffff;
-        }
-
-        @keyframes rotate {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-    </style>
+    .arrow {
+      width: 22px;
+      height: 22px;
+      transition: transform 0.3s ease-in-out;
+      color: #00ffff;
+    }
+  </style>
 </head>
 
 <body>
+  <h1>Welcome to the Wireless Network Design Tool</h1>
 
-    <h1>Welcome to the Wireless Network Design Tool</h1>
-
-    <div class="team">
-        <div class="member">
-            <img src="images\Aws.jpg">
-            <p>ENG. Aws Shaheen</p>
-        </div>
-        <div class="member">
-            <img src="images\Ghassan.jpg">
-            <p>ENG. Ghassan Qandeel</p>
-        </div>
-        <div class="member">
-            <img src="images\Ahmad.jpg">
-            <p>ENG. Ahmad Bakri</p>
-        </div>
+  <div class="team">
+    <div class="member">
+      <img src="/static/images/Aws.jpg" alt="Aws">
+      <p>ENG. Aws Shaheen</p>
     </div>
+    <div class="member">
+      <img src="/static/images/Ghassan.jpg" alt="Ghassan">
+      <p>ENG. Ghassan Qandeel</p>
+    </div>
+    <div class="member">
+      <img src="/static/images/Ahmad.jpg" alt="Ahmad">
+      <p>ENG. Ahmad Bakri</p>
+    </div>
+  </div>
 
-    <!-- Glowing animated button -->
-    <button class="super-button" onclick="window.location.href='index.html'">
-        <span>Start</span>
-        <svg fill="none" viewBox="0 0 24 24" class="arrow">
-            <path stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor"
-                d="M5 12h14M13 6l6 6-6 6"></path>
-        </svg>
-    </button>
+  <!-- Start Button -->
+  <button class="super-button" onclick="window.location.href='/index.html'">
+    <span>Start</span>
+    <svg fill="none" viewBox="0 0 24 24" class="arrow">
+      <path stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor"
+        d="M5 12h14M13 6l6 6-6 6"></path>
+    </svg>
+  </button>
 
 </body>
 
