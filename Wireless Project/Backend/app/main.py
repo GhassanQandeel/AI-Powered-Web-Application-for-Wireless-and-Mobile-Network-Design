@@ -15,7 +15,7 @@ FRONTEND_DIR = os.path.join(PROJECT_ROOT, "Frontend")
 ENV_PATH = os.path.join(PROJECT_ROOT, ".env")
 
 # Load environment variables
-load_dotenv(dotenv_path=ENV_PATH)
+load_dotenv()
 
 # Initialize FastAPI app
 app = FastAPI()
