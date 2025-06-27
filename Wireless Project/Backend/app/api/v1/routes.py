@@ -132,13 +132,13 @@ def calculate_ofdm(data):
         "spectral_efficiency_bps_per_hz": spectral_efficiency
     }
 
-def safe_float(value, default=None):
+def safe_float(value, default=0.0):
     try:
         return float(value)
     except (TypeError, ValueError):
         return default
 
-def safe_int(value, default=None):
+def safe_int(value, default=0):
     try:
         return int(value)
     except (TypeError, ValueError):
@@ -198,71 +198,55 @@ def calculate_wireless_comm(data):
 
 
 def calculate_cellular(data):
+    area_km2 = safe_float(data.get("area"))
+    cell_radius_km = safe_float(data.get("cell_radius"))
+    reuse_factor = safe_int(data.get("reuse_factor"), 1)
     bandwidth_mhz = safe_float(data.get("bandwidth"))
-    carrier_freq_mhz = safe_float(data.get("carrierFreq"))
-    cell_radius_km = safe_float(data.get("cellRadius"))
-    num_cells = safe_int(data.get("numCells"))
-    tx_power_dbm = safe_float(data.get("txPower"))
-    tx_gain_dbi = safe_float(data.get("txGain"))
-    reuse_factor = safe_int(data.get("reuseFactor"), 1)
-    user_density = safe_float(data.get("userDensity"))
-    user_data_rate_kbps = safe_float(data.get("userDataRate"))
-    snr_db = safe_float(data.get("snr"))
-    ci_db = safe_float(data.get("ci"))
-    traffic_demand_erlangs = safe_float(data.get("trafficDemand"))
+    channel_bandwidth_mhz = safe_float(data.get("channel_bandwidth"))
+    spectral_efficiency = safe_float(data.get("spectral_efficiency"))
+    subscribers = safe_int(data.get("subscribers"))
+    calls_per_day = safe_float(data.get("calls_per_day"))
+    call_duration_min = safe_float(data.get("call_duration"))
+    gos = safe_float(data.get("gos"))
 
-    # Derived/calculated values
-    area_per_cell_km2 = 3 * math.pi * (cell_radius_km ** 2) / 2  # Hexagonal cell area
-    total_area_km2 = area_per_cell_km2 * num_cells
-    total_users = user_density * total_area_km2
-    users_per_cell = user_density * area_per_cell_km2
-
-    # Frequency reuse
+    # Calculations
+    cell_area_km2 = (3 * math.sqrt(3) / 2) * (cell_radius_km ** 2)
+    num_cells = area_km2 / cell_area_km2
     total_bandwidth_hz = bandwidth_mhz * 1e6
-    bandwidth_per_cell_hz = total_bandwidth_hz / reuse_factor if reuse_factor > 0 else 0
+    channel_bw_hz = channel_bandwidth_mhz * 1e6
 
-    # Cell capacity (Shannon, theoretical, for reference)
-    snr_linear = 10 ** (snr_db / 10) if snr_db is not None else 0
-    if snr_linear > 0 and bandwidth_per_cell_hz > 0:
-        shannon_capacity_bps = bandwidth_per_cell_hz * (math.log2(1 + snr_linear))
-    else:
-        shannon_capacity_bps = 0
+    # Capacity
+    channels_per_cell = total_bandwidth_hz / (reuse_factor * channel_bw_hz) if channel_bw_hz > 0 else 0
+    total_channels = int(num_cells * channels_per_cell)
 
-    # User support per cell (based on data rate per user)
-    user_data_rate_bps = user_data_rate_kbps * 1e3
-    if user_data_rate_bps > 0:
-        max_users_per_cell = shannon_capacity_bps // user_data_rate_bps
-    else:
-        max_users_per_cell = 0
+    # Total offered traffic in Erlangs (simplified)
+    avg_call_sec = call_duration_min * 60
+    erlang_per_user = (calls_per_day * avg_call_sec) / 86400
+    total_traffic_erlangs = erlang_per_user * subscribers
+    traffic_per_cell = total_traffic_erlangs / num_cells if num_cells > 0 else 0
 
-    # C/I margin (for frequency planning)
-    ci_linear = 10 ** (ci_db / 10) if ci_db is not None else 0
-
-    # Traffic calculations (Erlang B, simple estimate)
-    traffic_per_cell = traffic_demand_erlangs
+    # Network capacity in bits per second
+    network_capacity_bps = total_bandwidth_hz * spectral_efficiency
 
     return {
-        "bandwidth_mhz": bandwidth_mhz,
-        "carrier_freq_mhz": carrier_freq_mhz,
+        "area_km2": area_km2,
         "cell_radius_km": cell_radius_km,
-        "num_cells": num_cells,
-        "tx_power_dbm": tx_power_dbm,
-        "tx_gain_dbi": tx_gain_dbi,
+        "cell_area_km2": cell_area_km2,
+        "num_cells": int(num_cells),
         "reuse_factor": reuse_factor,
-        "user_density_per_km2": user_density,
-        "user_data_rate_kbps": user_data_rate_kbps,
-        "snr_db": snr_db,
-        "ci_db": ci_db,
-        "traffic_demand_erlangs": traffic_demand_erlangs,
-        "area_per_cell_km2": area_per_cell_km2,
-        "total_area_km2": total_area_km2,
-        "total_users": total_users,
-        "users_per_cell": users_per_cell,
-        "bandwidth_per_cell_hz": bandwidth_per_cell_hz,
-        "shannon_capacity_bps": shannon_capacity_bps,
-        "max_users_per_cell": int(max_users_per_cell),
-        "traffic_per_cell_erlangs": traffic_per_cell,
-        "ci_linear": ci_linear
+        "bandwidth_mhz": bandwidth_mhz,
+        "channel_bandwidth_mhz": channel_bandwidth_mhz,
+        "channels_per_cell": int(channels_per_cell),
+        "total_channels": total_channels,
+        "spectral_efficiency_bps_per_hz": spectral_efficiency,
+        "network_capacity_bps": int(network_capacity_bps),
+        "subscribers": subscribers,
+        "calls_per_day": calls_per_day,
+        "call_duration_min": call_duration_min,
+        "gos": gos,
+        "traffic_per_cell_erlangs": round(traffic_per_cell, 2),
+        "total_traffic_erlangs": round(total_traffic_erlangs, 2),
+        "erlang_per_user": round(erlang_per_user, 4)
     }
 
 @router.post("/calculate")
@@ -369,39 +353,35 @@ async def calculate(request: Request):
         calculation = calculate_cellular(data)
         if "error" in calculation:
             return JSONResponse({"error": calculation["error"], "gemini": None})
-        # Compose rich Gemini prompt for cellular
+
         prompt = f"""
-            You are a cellular network design expert. Based on the following user inputs and computed results, provide a detailed explanation of how each parameter and result affects the design, capacity, and performance of the cellular system. Explain the significance of each metric and how the configuration impacts user support, area coverage, and spectral efficiency.
+        You are a cellular network design expert. Based on the following user inputs and computed results, explain the impact of each input on network capacity, frequency reuse, user support, and area coverage. Provide clear and helpful analysis.
 
-            User Inputs:
-            - Bandwidth: {data.get('bandwidth')} MHz
-            - Carrier Frequency: {data.get('carrierFreq')} MHz
-            - Cell Radius: {data.get('cellRadius')} km
-            - Number of Cells: {data.get('numCells')}
-            - Transmission Power: {data.get('txPower')} dBm
-            - Transmit Antenna Gain: {data.get('txGain')} dBi
-            - Frequency Reuse Factor: {data.get('reuseFactor')}
-            - User Density: {data.get('userDensity')} users/km²
-            - User Data Rate: {data.get('userDataRate')} kbps
-            - SNR: {data.get('snr')} dB
-            - C/I: {data.get('ci')} dB
-            - Traffic Demand: {data.get('trafficDemand')} Erlangs
+        User Inputs:
+        - Total Area: {data.get('area')} km²
+        - Cell Radius: {data.get('cell_radius')} km
+        - Frequency Reuse Factor: {data.get('reuse_factor')}
+        - Total Bandwidth: {data.get('bandwidth')} MHz
+        - Channel Bandwidth per User: {data.get('channel_bandwidth')} MHz
+        - Spectral Efficiency: {data.get('spectral_efficiency')} bps/Hz
+        - Number of Subscribers: {data.get('subscribers')}
+        - Calls per Day per Subscriber: {data.get('calls_per_day')}
+        - Average Call Duration: {data.get('call_duration')} minutes
+        - Grade of Service (GoS): {data.get('gos')}
 
-            Computed Results:
-            - Area per Cell: {calculation['area_per_cell_km2']:.2f} km²
-            - Total Area: {calculation['total_area_km2']:.2f} km²
-            - Total Users: {calculation['total_users']:.2f}
-            - Users per Cell: {calculation['users_per_cell']:.2f}
-            - Bandwidth per Cell: {calculation['bandwidth_per_cell_hz'] / 1e6:.2f} MHz
-            - Shannon Capacity per Cell: {calculation['shannon_capacity_bps'] / 1e6:.2f} Mbps
-            - Max Users per Cell: {calculation['max_users_per_cell']}
-            - Traffic per Cell: {calculation['traffic_per_cell_erlangs']:.2f} Erlangs
-            - C/I (linear): {calculation['ci_linear']:.2f}
+        Computed Results:
+        - Cell Area: {calculation['cell_area_km2']:.2f} km²
+        - Number of Cells: {calculation['num_cells']}
+        - Channels per Cell: {calculation['channels_per_cell']}
+        - Total Channels in Network: {calculation['total_channels']}
+        - Erlang per User: {calculation['erlang_per_user']:.4f}
+        - Total Network Traffic: {calculation['total_traffic_erlangs']:.2f} Erlangs
+        - Traffic per Cell: {calculation['traffic_per_cell_erlangs']:.2f} Erlangs
+        - Network Capacity: {calculation['network_capacity_bps'] / 1e6:.2f} Mbps
 
-            Discuss how these values are derived and their importance in cellular network design.
-            """
+        Provide a structured explanation of how these parameters define the size, capacity, and efficiency of the designed cellular network.
+        """
+
         gemini_response = ask_gemini(prompt)
         return JSONResponse({"calculation": calculation, "gemini": gemini_response})
 
-    else:
-        return JSONResponse({"error": "Unknown scenario", "gemini": None})
